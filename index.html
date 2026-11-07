@@ -161,6 +161,57 @@ details.editor summary::-webkit-details-marker { display: none; }
 .editor-body { padding: 0 16px 16px; }
 .foot { margin-top: 48px; border-top: 2px solid var(--line); padding-top: 12px; }
 .foot a { color: var(--muted); }
+/* RSVP guests and the who's-coming list */
+.guestlist { margin-top: 4px; }
+.guest { border-top: 1px solid var(--line); padding: 10px 0 2px; }
+details.more { margin-top: 6px; }
+details.more summary { cursor: pointer; color: var(--muted); font-weight: 600; font-size: 0.92rem; padding: 8px 0; min-height: 44px; display: flex; align-items: center; }
+details.roster { background: var(--bg); border-radius: 10px; margin-top: 8px; }
+details.roster summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; font-weight: 600; min-height: 48px; }
+details.roster summary::-webkit-details-marker { display: none; }
+details.roster .chev { display: inline-block; margin-right: 8px; color: var(--muted); transition: transform .15s ease; }
+details.roster[open] .chev { transform: rotate(90deg); }
+ul.party { list-style: none; margin: 0; padding: 0 12px 12px; display: grid; gap: 8px; }
+ul.guests { list-style: none; margin: 4px 0 0; padding-left: 16px; display: grid; gap: 2px; font-size: 0.92rem; }
+.muted { color: var(--muted); }
+
+/* Sign-up list */
+.slist { list-style: none; margin: 0; padding: 0; }
+.srow { border-bottom: 1px solid var(--line); padding: 10px 0; }
+.srow:last-child { border-bottom: 0; }
+.shead { display: flex; align-items: center; gap: 12px; min-height: 32px; }
+.shead label { flex: 1; font-weight: 500; }
+.sstatus { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+.srow.on .sstatus { color: var(--ink); font-weight: 600; }
+.srow.full label { color: var(--muted); }
+.snote { margin: 8px 0 0 34px; }
+.extra { display: grid; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.extra .linkbtn { justify-self: start; padding: 4px 0; }
+.results-list > li { background: var(--bg); border-radius: 10px; padding: 8px 12px; margin-top: 8px; }
+ul.who { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; font-size: 0.92rem; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* Time poll and scheduling */
+.tgroup { margin-top: 12px; }
+.tgroup:first-child { margin-top: 0; }
+.tday { font-weight: 700; margin-bottom: 2px; }
+input[type="radio"] { width: 22px; height: 22px; accent-color: var(--accent); flex: none; margin: 0; }
+input[type="date"], input[type="time"] { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 2px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 48px; }
+input[type="date"]:focus, input[type="time"]:focus { border-color: var(--focus); outline: none; }
+.timerow > div { flex: 1; min-width: 0; }
+
+/* Past events and check-in */
+details.past > summary { cursor: pointer; list-style: none; font-family: "Bricolage Grotesque", "Instrument Sans", sans-serif; font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; padding: 8px 0; min-height: 44px; }
+details.past > summary::-webkit-details-marker { display: none; }
+details.past > summary::before { content: "› "; color: var(--muted); }
+details.past[open] > summary::before { content: "⌄ "; }
+.on-photo details.past > summary { color: #FFFFFF; text-shadow: 0 1px 14px rgba(0,0,0,.5); }
+.checkin-list .btn.small { min-width: 104px; }
+
+/* Suggestions */
+.suggested { margin-top: 12px; font-size: 0.9rem; opacity: .85; }
+.honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
 /* Share buttons */
 .share { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .share .btn { width: auto; margin: 0; }
@@ -195,7 +246,7 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
 "use strict";
 (() => {
   /* ===================== Settings ===================== */
-  const API_URL = "https://script.google.com/macros/s/AKfycbwDhzWhzXcnT7xexbujkGtq4WOAdaoocC9j5YV5lW-JPD42_KHgaw1N5uEB6dxGlPLS/exec";                 // Paste your Apps Script web app URL (ends in /exec). See SETUP.md.
+  const API_URL = "https://script.google.com/macros/s/AKfycbxyK-ZLBO-5-xNM9jC4C74H_LzTDl5yuZV2QwHPXCTsLWbH2J04iI4qV3sObTmLZJB_/exec";                 // Paste your Apps Script web app URL (ends in /exec). See SETUP.md.
   const DEFAULT_TITLE = "DR October 2026 Mission Trip";   // Used until the sheet's Settings tab loads
   const DEFAULT_SUB = "Planning Group Events";
   const REFRESH_MS = 45000;           // How often open pages pull in new answers
@@ -229,6 +280,8 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
   const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
   const nameKey = s => String(s || "").trim().replace(/\s+/g, " ").toLowerCase();
   const EMAIL_RE = /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[^\s@<>"',;]{2,}$/;
+  const PHONE_RE = /^[0-9+().\-\s]{7,25}$/;
+  const firstName = s => String(s || "").trim().split(/\s+/)[0] || "";
   const clampInt = (v, lo, hi, d) => { let n = parseInt(v, 10); if (isNaN(n)) n = d; return Math.min(hi, Math.max(lo, n)); };
   const pct = f => Math.max(0, Math.min(100, Math.round(f * 100)));
   const store = {
@@ -301,6 +354,8 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     const events = (res.events || []).map(e => ({
       id: String(e.id || ""), sectionId: String(e.sectionId || ""), title: String(e.title || "Untitled event"), theme: themeOf(e.theme),
       description: String(e.description || ""), location: String(e.location || ""), time: String(e.time || ""),
+      suggestedBy: String(e.suggestedBy || ""), suggestedAt: String(e.suggestedAt || ""), suggesterHasEmail: !!e.suggesterHasEmail,
+      sectionReadonly: !!e.sectionReadonly,
       order: Number(e.order) || 0, status: String(e.status || "open")
     })).filter(e => e.id).sort(byOrder);
     const blocks = (res.blocks || []).map(b => ({ id: String(b.id || ""), eventId: String(b.eventId || ""), type: String(b.type || ""), title: String(b.title || ""), order: Number(b.order) || 0, config: obj(b.config) }))
@@ -312,6 +367,12 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
       error: "", settings: obj(res.settings), sections, events, blocks, answers,
       contacts: obj(res.contacts), lastReminders: obj(res.lastReminders), mailQuota: res.mailQuota == null ? null : Number(res.mailQuota),
       groupme: obj(res.groupme), lastGroupMe: obj(res.lastGroupMe),
+      scheduled: (Array.isArray(res.scheduled) ? res.scheduled : []).map(x => ({ id: String(x.id || ""), eventId: String(x.eventId || ""),
+        sendAt: String(x.sendAt || ""), channels: arr(x.channels), audience: String(x.audience || "all"), subject: String(x.subject || ""),
+        message: String(x.message || ""), status: String(x.status || ""), sentAt: String(x.sentAt || ""), result: String(x.result || "") })).filter(x => x.id),
+      schedulerRunning: res.schedulerRunning === undefined ? null : !!res.schedulerRunning,
+      checkins: (Array.isArray(res.checkins) ? res.checkins : []).map(x => ({ eventId: String(x.eventId || ""), nameKey: String(x.nameKey || ""),
+        name: String(x.name || ""), party: clampInt(x.party, 1, 30, 1) })).filter(x => x.eventId && x.nameKey),
       event: id => events.find(e => e.id === id) || null,
       blocksOf: id => blocks.filter(b => b.eventId === id),
       rowsOf: id => rowsBy[id] || []
@@ -444,17 +505,56 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     const [hh, mm] = t.split(":").map(Number);
     return new Date(2000, 0, 1, hh, mm).toLocaleTimeString("en-US", mm ? { hour: "numeric", minute: "2-digit" } : { hour: "numeric" });
   }
+  // The same moment on this device's clock, like "5 PM", when the viewer is in another time zone.
+  function yourTime(dateKey, time, tz) {
+    const dz = deviceZone();
+    if (!zoneOk(tz) || !dz || tz === dz || !TIME_RE.test(String(time || ""))) return "";
+    const d = new Date(zonedUtc(dateKey, time, tz));
+    const t = d.toLocaleTimeString("en-US", d.getMinutes() ? { hour: "numeric", minute: "2-digit" } : { hour: "numeric" });
+    const localKey = keyOf(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    return (localKey !== dateKey ? `${pretty(localKey)}, ` : "") + t;
+  }
+  const isRepeating = c => !!c && ["weekly", "biweekly", "monthly"].includes(c.repeat) && DATE_RE.test(String(c.repeatUntil || "")) && c.repeatUntil > c.date;
+  // Every date a calendar block happens on: one date, or each repeat up to its end date.
+  function occurrences(c) {
+    if (!c || !DATE_RE.test(String(c.date || ""))) return [];
+    if (!isRepeating(c)) return [c.date];
+    const [y, m, d] = parts(c.date), out = [];
+    for (let i = 0; i < 120; i++) {
+      const dt = c.repeat === "monthly" ? new Date(Date.UTC(y, m - 1 + i, d)) : new Date(Date.UTC(y, m - 1, d + i * (c.repeat === "biweekly" ? 14 : 7)));
+      if (c.repeat === "monthly" && dt.getUTCDate() !== d) continue;
+      const k = dt.toISOString().slice(0, 10);
+      if (k > c.repeatUntil) break;
+      out.push(k);
+    }
+    return out;
+  }
+  const nextOccurrence = c => occurrences(c).find(k => k >= todayKey()) || "";
   function calWhen(c) {
     const t = calTimes(c);
     if (!t) return "";
+    if (isRepeating(c)) {
+      const [y, m, d] = parts(c.date);
+      const dayName = new Date(y, m - 1, d).toLocaleDateString("en-US", { weekday: "long" });
+      let r = c.repeat === "monthly" ? `Monthly on day ${d}` : `${c.repeat === "biweekly" ? "Every other" : "Every"} ${dayName}`;
+      if (!t.allDay) r += `, ${fmtTime(t.startTime)}` + (TIME_RE.test(String(c.end || "")) ? ` to ${fmtTime(t.endTime)}` : "");
+      if (!t.allDay && t.tz && t.tz !== deviceZone()) r += ` (${zoneLabel(t.tz)} time)`;
+      const next = nextOccurrence(c);
+      if (!next) return r + `. Ended ${pretty(c.repeatUntil)}`;
+      const yt = t.allDay ? "" : yourTime(next, t.startTime, t.tz);
+      return r + `. Next: ${pretty(next)}` + (yt ? ` (${yt} your time)` : "");
+    }
     if (t.allDay) { const last = addDays(t.endExcl, -1); return last === t.start ? pretty(t.start) : `${pretty(t.start)} to ${pretty(last)}`; }
     let s = `${pretty(t.startKey)}, ${fmtTime(t.startTime)}`;
     if (TIME_RE.test(String(c.end || "")) || t.endKey !== t.startKey) s += t.endKey === t.startKey ? ` to ${fmtTime(t.endTime)}` : ` to ${pretty(t.endKey)}, ${fmtTime(t.endTime)}`;
-    if (t.tz && t.tz !== deviceZone()) s += ` (${zoneLabel(t.tz)} time)`;
+    if (t.tz && t.tz !== deviceZone()) {
+      const yt = yourTime(t.startKey, t.startTime, t.tz);
+      s += ` (${zoneLabel(t.tz)} time` + (yt ? `; ${yt} your time)` : ")");
+    }
     return s;
   }
   function activeAlerts(c, t) {
-    const ok = t.allDay ? ["week", "day", "morning"] : ["week", "day", "2h", "30m"].concat(t.tz && t.startTime > "09:00" ? ["morning"] : []);
+    const ok = t.allDay ? ["week", "day", "morning"] : ["week", "day", "2h", "30m"].concat(t.tz && t.startTime > "09:00" && !isRepeating(c) ? ["morning"] : []);
     return ALERTS.map(a => a[0]).filter(k => arr(c.alerts).includes(k) && ok.includes(k));
   }
   const utcStamp = ms => new Date(ms).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
@@ -474,6 +574,7 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     if (t.allDay) L.push("DTSTART;VALUE=DATE:" + dateStamp(t.start), "DTEND;VALUE=DATE:" + dateStamp(t.endExcl));
     else if (t.tz) L.push("DTSTART:" + utcStamp(t.startUtc), "DTEND:" + utcStamp(t.endUtc));
     else L.push("DTSTART:" + floatStamp(t.startKey, t.startTime), "DTEND:" + floatStamp(t.endKey, t.endTime));
+    if (isRepeating(c)) L.push("RRULE:" + repeatRule(c, t));
     L.push("SUMMARY:" + icsEscape(ev.title));
     if (ev.location) L.push("LOCATION:" + icsEscape(ev.location));
     L.push("DESCRIPTION:" + icsEscape([c.notes, link].filter(Boolean).join("\n\n")));
@@ -486,12 +587,18 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     L.push("END:VEVENT", "END:VCALENDAR");
     return L.map(icsFold).join("\r\n") + "\r\n";
   }
+  function repeatRule(c, t) {
+    const freq = c.repeat === "monthly" ? "FREQ=MONTHLY" : "FREQ=WEEKLY" + (c.repeat === "biweekly" ? ";INTERVAL=2" : "");
+    const until = t.allDay ? dateStamp(c.repeatUntil) : t.tz ? utcStamp(zonedUtc(c.repeatUntil, "23:59", t.tz)) : dateStamp(c.repeatUntil) + "T235900";
+    return `${freq};UNTIL=${until}`;
+  }
   function googleCalLink(block, ev, link) {
     const c = block.config, t = calTimes(c);
     const dates = t.allDay ? `${dateStamp(t.start)}/${dateStamp(t.endExcl)}`
       : t.tz ? `${utcStamp(t.startUtc)}/${utcStamp(t.endUtc)}` : `${floatStamp(t.startKey, t.startTime)}/${floatStamp(t.endKey, t.endTime)}`;
     const q = new URLSearchParams({ action: "TEMPLATE", text: ev.title, dates, details: [c.notes, link].filter(Boolean).join("\n\n") });
     if (ev.location) q.set("location", ev.location);
+    if (isRepeating(c)) q.set("recur", "RRULE:" + repeatRule(c, t));
     return "https://calendar.google.com/calendar/render?" + q.toString();
   }
   const eventLink = ev => location.href.split("#")[0] + "#/e/" + encodeURIComponent(ev.id);
@@ -507,6 +614,19 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
       return !!ok;
     } catch (e) { return false; }
   }
+  // Time poll options look like { date: "2026-11-21", start: "18:00", end: "21:00" }. Answers store their keys.
+  const slotKey = sl => `${sl.date}T${sl.start}${sl.end ? "-" + sl.end : ""}`;
+  const validSlots = v => (Array.isArray(v) ? v : [])
+    .filter(sl => sl && DATE_RE.test(String(sl.date || "")) && TIME_RE.test(String(sl.start || "")))
+    .map(sl => ({ date: String(sl.date), start: String(sl.start), end: TIME_RE.test(String(sl.end || "")) && sl.end !== sl.start ? String(sl.end) : "" }))
+    .sort((a, b) => (slotKey(a) < slotKey(b) ? -1 : 1));
+  const slotLabel = sl => fmtTime(sl.start) + (sl.end ? ` to ${fmtTime(sl.end)}` : "");
+  function groupByDate(slots) {
+    const m = new Map();
+    slots.forEach(sl => { if (!m.has(sl.date)) m.set(sl.date, []); m.get(sl.date).push(sl); });
+    return [...m.entries()];
+  }
+
   function calTextFor(ev, source) {
     const b = (source || data).blocksOf(ev.id).find(x => x.type === "calendar" && DATE_RE.test(String(x.config.date || "")));
     return b ? calWhen(b.config) : "";
@@ -541,45 +661,112 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     },
 
     rsvp: {
-      label: "RSVP", hint: "Going, maybe, or can’t make it, plus extra guests.",
+      label: "RSVP", hint: "Going, maybe, or can’t make it, plus extra guests with optional names and contact info.",
       fields: [
         { key: "allowMaybe", kind: "toggle", label: "Offer a Maybe option" },
         { key: "allowGuests", kind: "toggle", label: "Let people bring extra guests" },
-        { key: "maxGuests", kind: "number", label: "Most extra guests per person", min: 0, max: 20 }
+        { key: "maxGuests", kind: "number", label: "Most extra guests per person", min: 0, max: 20 },
+        { key: "askGuestDetails", kind: "toggle", label: "Ask for guest names and contact info (always optional)" }
       ],
-      defaults: () => ({ allowMaybe: true, allowGuests: true, maxGuests: 5 }),
-      respond(block, ans, set) {
+      defaults: () => ({ allowMaybe: true, allowGuests: true, maxGuests: 5, askGuestDetails: true }),
+      respond(block, ans, set, ctx) {
         const c = block.config;
-        const a = { status: String((ans && ans.status) || ""), guests: clampInt(ans && ans.guests, 0, 20, 0) };
-        const opts = [["yes", "I’m going"]].concat(c.allowMaybe !== false ? [["maybe", "Maybe"]] : []).concat([["no", "Can’t make it"]]);
+        const ask = c.askGuestDetails !== false;
         const max = c.allowGuests !== false ? clampInt(c.maxGuests, 0, 20, 5) : 0;
-        const emit = () => { set({ status: a.status, guests: a.guests }); draw(); };
-        const btns = opts.map(([v, l]) => h("button", { type: "button", role: "radio", onclick: () => { a.status = v; if (v === "no") a.guests = 0; emit(); } }, l));
+        const savedKey = () => `planner-gc:${block.id}:${ctx.me()}`;
+        let remembered = [];
+        try { remembered = JSON.parse(store.get(savedKey(), "[]")) || []; } catch (e) { remembered = []; }
+        const a = {
+          status: String((ans && ans.status) || ""),
+          guests: clampInt(ans && ans.guests, 0, max, 0),
+          names: arr(ans && ans.guestNames),
+          contacts: (Array.isArray(ans && ans.guestContacts) ? ans.guestContacts : Array.isArray(remembered) ? remembered : [])
+            .map(x => ({ phone: String((x && x.phone) || ""), email: String((x && x.email) || "") }))
+        };
+        const opts = [["yes", "I’m going"]].concat(c.allowMaybe !== false ? [["maybe", "Maybe"]] : []).concat([["no", "Can’t make it"]]);
+        const emit = () => set({
+          status: a.status, guests: a.guests,
+          guestNames: ask ? Array.from({ length: a.guests }, (_, i) => String(a.names[i] || "").trim()) : [],
+          guestContacts: ask ? Array.from({ length: a.guests }, (_, i) => a.contacts[i] || { phone: "", email: "" }) : []
+        });
+        const btns = opts.map(([v, l]) => h("button", { type: "button", role: "radio", onclick: () => { a.status = v; if (v === "no") a.guests = 0; emit(); draw(); drawGuests(); } }, l));
         const out = h("output", { "aria-live": "polite" }, "0");
-        const guests = h("div", { class: "row", style: "margin-top:14px" },
+        const step = n => { a.guests = Math.min(max, Math.max(0, a.guests + n)); emit(); draw(); drawGuests(); };
+        const guestsRow = h("div", { class: "row", style: "margin-top:14px" },
           h("div", null, h("div", { class: "strong" }, "Extra guests"), h("div", { class: "hint", style: "margin:0" }, "Not counting you")),
           h("div", { class: "stepper" },
-            h("button", { type: "button", class: "nav", "aria-label": "Fewer guests", onclick: () => { a.guests = Math.max(0, a.guests - 1); emit(); } }, "−"),
+            h("button", { type: "button", class: "nav", "aria-label": "Fewer guests", onclick: () => step(-1) }, "−"),
             out,
-            h("button", { type: "button", class: "nav", "aria-label": "More guests", onclick: () => { a.guests = Math.min(max, a.guests + 1); emit(); } }, "+")));
+            h("button", { type: "button", class: "nav", "aria-label": "More guests", onclick: () => step(1) }, "+")));
+        const list = h("div", { class: "guestlist" });
+        const nameInputs = [];
+        function placeholders() {
+          const first = firstName(ctx.name()) || "Guest";
+          nameInputs.forEach((inp, i) => { inp.placeholder = `${first} +${i + 1}`; });
+          const tip = list.querySelector(".hint");
+          if (tip) tip.textContent = `Names are optional. Anyone left blank shows as ${first} +1, ${first} +2, and so on. Only the host sees contact info.`;
+        }
+        function drawGuests() {
+          clear(list);
+          nameInputs.length = 0;
+          if (!ask || !a.guests || a.status === "no" || !a.status) return;
+          add(list, h("p", { class: "hint" }));
+          for (let i = 0; i < a.guests; i++) {
+            const nid = `gn-${block.id}-${i}`, pid = `gp-${block.id}-${i}`, eid = `ge-${block.id}-${i}`;
+            const ci = a.contacts[i] || (a.contacts[i] = { phone: "", email: "" });
+            const nameIn = h("input", { type: "text", id: nid, maxLength: 40, autocomplete: "off", value: a.names[i] || "",
+              oninput: e => { a.names[i] = e.target.value; emit(); } });
+            nameInputs.push(nameIn);
+            const phoneIn = h("input", { type: "tel", id: pid, maxLength: 25, autocomplete: "off", inputmode: "tel", placeholder: "Phone (optional)", value: ci.phone,
+              oninput: e => { ci.phone = e.target.value.trim(); emit(); } });
+            const emailIn = h("input", { type: "email", id: eid, maxLength: 254, autocomplete: "off", autocapitalize: "off", spellcheck: "false", placeholder: "Email (optional)", value: ci.email,
+              oninput: e => { ci.email = e.target.value.trim(); emit(); } });
+            add(list, h("div", { class: "guest" },
+              h("label", { class: "field", for: nid, style: "margin-top:4px" }, `Guest ${i + 1} name (optional)`), nameIn,
+              h("details", { class: "more", open: ci.phone || ci.email ? true : null },
+                h("summary", null, "Add contact info (optional)"),
+                h("label", { class: "field", for: pid }, "Phone"), phoneIn,
+                h("label", { class: "field", for: eid }, "Email"), emailIn)));
+          }
+          placeholders();
+        }
         function draw() {
           btns.forEach((b, i) => b.setAttribute("aria-checked", opts[i][0] === a.status ? "true" : "false"));
-          guests.hidden = !(max > 0 && (a.status === "yes" || a.status === "maybe"));
+          guestsRow.hidden = !(max > 0 && (a.status === "yes" || a.status === "maybe"));
           out.textContent = String(a.guests);
         }
         draw();
-        return h("div", null, h("div", { class: "seg", role: "radiogroup", "aria-label": block.title || "RSVP", style: `grid-template-columns:repeat(${opts.length},1fr)` }, btns), guests);
+        drawGuests();
+        const wrap = h("div", null, h("div", { class: "seg", role: "radiogroup", "aria-label": block.title || "RSVP", style: `grid-template-columns:repeat(${opts.length},1fr)` }, btns), guestsRow, list);
+        wrap._refresh = placeholders;
+        return wrap;
       },
-      check: (a, block) => (a && a.status ? "" : `Choose whether you can make it in “${block.title || "RSVP"}.”`),
+      check: (a, block) => {
+        if (!a || !a.status) return `Choose whether you can make it in “${block.title || "RSVP"}.”`;
+        const bad = (Array.isArray(a.guestContacts) ? a.guestContacts : []).findIndex(x => x && ((x.email && !EMAIL_RE.test(x.email)) || (x.phone && !PHONE_RE.test(x.phone))));
+        return bad >= 0 ? `Check the phone or email for guest ${bad + 1}.` : "";
+      },
       results(block, rows) {
-        const by = s => rows.filter(r => r.answer.status === s);
         const guestsOf = r => clampInt(r.answer.guests, 0, 20, 0);
         const people = list => list.reduce((n, r) => n + 1 + guestsOf(r), 0);
-        const label = r => r.name + (guestsOf(r) ? ` +${guestsOf(r)}` : "");
+        const by = s => rows.filter(r => r.answer.status === s);
         const yes = by("yes"), maybe = by("maybe"), no = by("no");
         const tiles = [[people(yes), "going"]].concat(block.config.allowMaybe !== false ? [[people(maybe), "maybe"]] : []).concat([[no.length, "can’t make it"]]);
-        const groups = [["Going", yes], ["Maybe", maybe], ["Can’t make it", no]].filter(g => g[1].length);
-        return h("div", null, stats(tiles), h("ul", { class: "list" }, groups.map(([l, list]) => row(l, String(list.length), h("div", { class: "names" }, list.map(label).join(", "))))));
+        const party = r => {
+          const first = firstName(r.name) || r.name;
+          const names = arr(r.answer.guestNames);
+          const g = guestsOf(r);
+          return h("li", null, h("span", { class: "strong" }, r.name),
+            g ? h("ul", { class: "guests" }, Array.from({ length: g }, (_, i) => {
+              const n = String(names[i] || "").trim();
+              return n ? h("li", null, n, h("span", { class: "muted" }, ` (with ${first})`)) : h("li", null, `${first} +${i + 1}`);
+            })) : null);
+        };
+        const group = (label, list, open, countPeople) => list.length ? h("details", { class: "roster", open: open || null },
+          h("summary", null, h("span", null, h("span", { class: "chev", "aria-hidden": "true" }, "›"), label),
+            h("span", { class: "badge" }, countPeople ? plural(people(list), "person", "people") : plural(list.length, "person", "people"))),
+          h("ul", { class: "party" }, list.map(party))) : null;
+        return h("div", null, stats(tiles), group("Going", yes, true, true), group("Maybe", maybe, false, true), group("Can’t make it", no, false, false));
       }
     },
 
@@ -655,48 +842,98 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     },
 
     signup: {
-      label: "Sign-up list", hint: "Things to bring or jobs to cover. Optionally cap how many people can take each one.",
-      fields: [{ key: "items", kind: "slots", label: "Items, one per line. Add x2 at the end to cap it at 2 people." }],
-      defaults: () => ({ items: [{ label: "Main dish", slots: 0 }, { label: "Side", slots: 0 }, { label: "Dessert", slots: 0 }, { label: "Drinks", slots: 0 }] }),
+      label: "Sign-up list", hint: "Things to bring or jobs to cover, with notes. Optionally cap how many people can take each one.",
+      fields: [
+        { key: "items", kind: "slots", label: "Items, one per line. Add x2 at the end to cap it at 2 people." },
+        { key: "allowOther", kind: "toggle", label: "Let people add their own items" }
+      ],
+      defaults: () => ({ items: [{ label: "Main dish", slots: 0 }, { label: "Side", slots: 0 }, { label: "Dessert", slots: 0 }, { label: "Drinks", slots: 0 }], allowOther: true }),
       respond(block, ans, set, ctx) {
-        const items = (Array.isArray(block.config.items) ? block.config.items : []).filter(it => it && it.label);
+        const c = block.config;
+        const items = (Array.isArray(c.items) ? c.items : []).filter(it => it && it.label);
         const mine = new Set(arr(ans && ans.items));
+        const notes = Object.assign({}, ans && ans.notes && typeof ans.notes === "object" ? ans.notes : {});
+        const extras = (Array.isArray(ans && ans.extras) ? ans.extras : []).map(x => ({ label: String((x && x.label) || ""), note: String((x && x.note) || "") }));
+        const allowOther = c.allowOther !== false;
         const taken = it => ctx.rows().filter(r => r.key !== ctx.me() && arr(r.answer.items).includes(it.label)).length;
         const full = it => it.slots > 0 && taken(it) >= it.slots;
-        const views = items.map(it => {
-          const small = h("small");
-          const b = h("button", {
-            type: "button", class: "chip",
-            onclick: () => {
-              if (mine.has(it.label)) mine.delete(it.label);
-              else { if (full(it)) return; mine.add(it.label); }
-              set({ items: items.map(x => x.label).filter(l => mine.has(l)) });
-              draw();
-            }
-          }, it.label, small);
-          return { it, b, small };
+        const emit = () => {
+          const picked = items.map(x => x.label).filter(l => mine.has(l));
+          const keptNotes = {};
+          picked.forEach(l => { const n = String(notes[l] || "").trim(); if (n) keptNotes[l] = n; });
+          set({ items: picked, notes: keptNotes, extras: extras.filter(x => x.label.trim()).map(x => ({ label: x.label.trim(), note: x.note.trim() })) });
+        };
+        const rowsV = items.map((it, i) => {
+          const id = `su-${block.id}-${i}`, nid = `sn-${block.id}-${i}`;
+          const cb = h("input", { type: "checkbox", id, checked: mine.has(it.label) });
+          const status = h("span", { class: "sstatus" });
+          const note = h("input", { type: "text", id: nid, maxLength: 120, placeholder: "Add a note (optional), like what kind", "aria-label": `Note for ${it.label}`, value: notes[it.label] || "" });
+          const noteWrap = h("div", { class: "snote" }, note);
+          cb.addEventListener("change", () => {
+            if (cb.checked) { if (full(it)) { cb.checked = false; return; } mine.add(it.label); } else mine.delete(it.label);
+            emit(); draw();
+          });
+          note.addEventListener("input", () => { notes[it.label] = note.value; emit(); });
+          const li = h("li", { class: "srow" }, h("div", { class: "shead" }, cb, h("label", { for: id }, it.label), status), noteWrap);
+          return { it, cb, status, noteWrap, li };
         });
         function draw() {
-          views.forEach(({ it, b, small }) => {
-            const on = mine.has(it.label), n = taken(it);
-            b.setAttribute("aria-pressed", on ? "true" : "false");
-            b.disabled = !on && full(it);
-            small.textContent = it.slots ? ` (${Math.min(it.slots, n + (on ? 1 : 0))} of ${it.slots})` : (n ? ` (${n} signed up)` : "");
+          rowsV.forEach(({ it, cb, status, noteWrap, li }) => {
+            const on = mine.has(it.label), n = taken(it), isFull = !on && full(it);
+            cb.checked = on;
+            cb.disabled = isFull;
+            li.classList.toggle("on", on);
+            li.classList.toggle("full", isFull);
+            noteWrap.hidden = !on;
+            const count = n + (on ? 1 : 0);
+            status.textContent = it.slots ? (isFull ? "Full" : `${Math.min(it.slots, count)} of ${it.slots}`) : (count ? `${count} bringing` : "Still needed");
           });
         }
+        const extrasBox = h("div");
+        function drawExtras(focusLast) {
+          clear(extrasBox);
+          if (!allowOther) return;
+          add(extrasBox, h("div", { class: "field" }, "Something else"));
+          extras.forEach((x, i) => {
+            const lid = `sx-${block.id}-${i}`, nid = `sxn-${block.id}-${i}`;
+            add(extrasBox, h("div", { class: "extra" },
+              h("label", { class: "sr-only", for: lid }, `Something else you’ll bring, item ${i + 1}`),
+              h("input", { type: "text", id: lid, maxLength: 60, placeholder: "What you’ll bring", value: x.label, oninput: e => { x.label = e.target.value; emit(); } }),
+              h("label", { class: "sr-only", for: nid }, `Note for item ${i + 1}`),
+              h("input", { type: "text", id: nid, maxLength: 120, placeholder: "Note (optional)", value: x.note, oninput: e => { x.note = e.target.value; emit(); } }),
+              h("button", { type: "button", class: "linkbtn", onclick: () => { extras.splice(i, 1); emit(); drawExtras(); } }, "Remove")));
+          });
+          if (extras.length < 5) add(extrasBox, h("button", { type: "button", class: "btn small ghost", style: "margin-top:8px",
+            onclick: () => { extras.push({ label: "", note: "" }); drawExtras(true); } }, extras.length ? "Add another" : "Add something else"));
+          if (focusLast) { const ins = extrasBox.querySelectorAll('input[id^="sx-"]'); if (ins.length) ins[ins.length - 1].focus(); }
+        }
         draw();
-        const out = h("div", null, h("div", { class: "chips", role: "group", "aria-label": block.title || "Sign-up list" }, views.map(v => v.b)),
-          h("p", { class: "hint" }, "Tap what you’ll bring or cover. Tap again to undo."));
+        drawExtras();
+        const out = h("div", null, h("ul", { class: "slist", "aria-label": block.title || "Sign-up list" }, rowsV.map(v => v.li)),
+          extrasBox, h("p", { class: "hint" }, "Check what you’ll bring or cover. Notes are visible to everyone."));
         out._refresh = draw;
         return out;
       },
       results(block, rows) {
         const items = (Array.isArray(block.config.items) ? block.config.items : []).filter(it => it && it.label);
-        return h("ul", { class: "list" }, items.map(it => {
-          const who = rows.filter(r => arr(r.answer.items).includes(it.label)).map(r => r.name);
-          const badge = it.slots ? (who.length >= it.slots ? "Full" : `${who.length} of ${it.slots}`) : (who.length ? `${who.length} signed up` : "Still needed");
-          return row(it.label, badge, who.length ? h("div", { class: "names" }, who.join(", ")) : null, !who.length);
+        const noteOf = (r, label) => { const n = r.answer.notes && typeof r.answer.notes === "object" ? r.answer.notes[label] : ""; return n ? String(n) : ""; };
+        const extras = [];
+        rows.forEach(r => (Array.isArray(r.answer.extras) ? r.answer.extras : []).forEach(x => {
+          if (x && x.label) extras.push({ name: r.name, label: String(x.label), note: String(x.note || "") });
         }));
+        const person = (name, note) => h("li", null, h("span", { class: "strong" }, name), note ? h("span", { class: "muted" }, `: ${note}`) : null);
+        return h("div", null,
+          h("ul", { class: "slist results-list" }, items.map(it => {
+            const who = rows.filter(r => arr(r.answer.items).includes(it.label));
+            const badge = it.slots ? (who.length >= it.slots ? "Full" : `${who.length} of ${it.slots}`) : (who.length ? `${who.length} bringing` : "Still needed");
+            return h("li", null,
+              h("div", { class: "top" }, h("span", null, it.label), h("span", { class: who.length ? "badge" : "badge need" }, badge)),
+              who.length ? h("ul", { class: "who" }, who.map(r => person(r.name, noteOf(r, it.label)))) : null);
+          })),
+          extras.length ? h("div", { class: "mt" }, h("h3", null, "Also bringing"),
+            h("ul", { class: "slist results-list" }, extras.map(x => h("li", null,
+              h("div", { class: "top" }, h("span", null, x.label), h("span", { class: "badge" }, x.name)),
+              x.note ? h("div", { class: "names" }, x.note) : null)))) : null);
       }
     },
 
@@ -751,9 +988,11 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
         { key: "endDate", kind: "day", label: "Last day, only for events that span several days" },
         { key: "timeZone", kind: "zone", label: "Time zone where the event happens" },
         { key: "alerts", kind: "choices", label: "Remind guests", options: ALERTS },
-        { key: "notes", kind: "textarea", label: "Notes for the calendar entry (optional)" }
+        { key: "notes", kind: "textarea", label: "Notes for the calendar entry (optional)" },
+        { key: "repeat", kind: "select", label: "Repeat", options: [["none", "Doesn’t repeat"], ["weekly", "Every week"], ["biweekly", "Every other week"], ["monthly", "Every month on the same date"]] },
+        { key: "repeatUntil", kind: "day", label: "Repeat until (needed for repeating events)" }
       ],
-      defaults: () => ({ date: "", endDate: "", start: "", end: "", timeZone: zoneOk(deviceZone()) ? deviceZone() : "America/New_York", alerts: ["day"], notes: "" }),
+      defaults: () => ({ date: "", endDate: "", start: "", end: "", timeZone: zoneOk(deviceZone()) ? deviceZone() : "America/New_York", alerts: ["day"], notes: "", repeat: "none", repeatUntil: "" }),
       display(block) {
         const ev = data && data.event(block.eventId);
         const t = calTimes(block.config);
@@ -771,6 +1010,66 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
             h("a", { class: "btn", href: file, download: fname }, "Apple Calendar or Outlook"),
             h("a", { class: "btn ghost", href: googleCalLink(block, ev, link), target: "_blank", rel: "noopener noreferrer" }, "Google Calendar")),
           h("p", { class: "hint" }, (when ? `Your phone will remind you ${when}. ` : "") + "Google Calendar uses your usual notification settings. If a button doesn’t open, open this page in Safari or Chrome."));
+      }
+    },
+
+    times: {
+      label: "Time poll", hint: "People pick the specific times that work, like Saturday at 6 PM or Sunday at 2 PM.",
+      fields: [
+        { key: "slots", kind: "timeslots", label: "Time options" },
+        { key: "multi", kind: "toggle", label: "Let people pick more than one time" },
+        { key: "timeZone", kind: "zone", label: "Time zone where the event happens" }
+      ],
+      defaults: () => ({ slots: [], multi: true, timeZone: zoneOk(deviceZone()) ? deviceZone() : "America/New_York" }),
+      respond(block, ans, set) {
+        const c = block.config, slots = validSlots(c.slots), multi = c.multi !== false;
+        if (!slots.length) return h("p", { class: "hint" }, "Time options are coming soon.");
+        const keys = new Set(slots.map(slotKey));
+        const picked = new Set(arr(ans && ans.slots).filter(k => keys.has(k)));
+        const emit = () => set({ slots: [...picked].sort() });
+        const groups = groupByDate(slots).map(([date, list]) => h("div", { class: "tgroup" },
+          h("div", { class: "tday" }, pretty(date)),
+          h("ul", { class: "slist" }, list.map(sl => {
+            const k = slotKey(sl), id = `ts-${block.id}-${k.replace(/[^0-9a-z]/gi, "")}`;
+            const inp = h("input", { type: multi ? "checkbox" : "radio", name: multi ? null : `ts-${block.id}`, id, checked: picked.has(k) });
+            inp.addEventListener("change", () => {
+              if (multi) { if (inp.checked) picked.add(k); else picked.delete(k); }
+              else { picked.clear(); if (inp.checked) picked.add(k); }
+              emit();
+            });
+            const yt = yourTime(sl.date, sl.start, c.timeZone);
+            return h("li", { class: "srow" }, h("div", { class: "shead" }, inp, h("label", { for: id }, slotLabel(sl) + (yt ? ` (${yt} your time)` : ""))));
+          }))));
+        const zoneNote = zoneOk(c.timeZone) && c.timeZone !== deviceZone() ? h("p", { class: "hint" }, `Times are ${zoneLabel(c.timeZone)} time. Your own time is in parentheses.`) : null;
+        return h("div", { role: multi ? "group" : "radiogroup", "aria-label": block.title || "Time poll" }, groups, zoneNote,
+          h("p", { class: "hint" }, multi ? "Check every time that works for you." : "Pick the time that works best."));
+      },
+      results(block, rows) {
+        const counts = validSlots(block.config.slots)
+          .map(sl => ({ sl, who: rows.filter(r => arr(r.answer.slots).includes(slotKey(sl))).map(r => r.name) }))
+          .filter(x => x.who.length)
+          .sort((a, b) => b.who.length - a.who.length || (slotKey(a.sl) < slotKey(b.sl) ? -1 : 1));
+        if (!counts.length) return h("p", { class: "hint" }, "No times picked yet.");
+        const max = counts[0].who.length;
+        return h("ul", { class: "rank" }, counts.map(x => h("li", null,
+          h("div", { class: "top" }, h("span", null, `${pretty(x.sl.date)}, ${slotLabel(x.sl)}`), h("span", null, plural(x.who.length, "person", "people"))),
+          meter(x.who.length / max), h("div", { class: "names" }, x.who.join(", ")))));
+      }
+    },
+
+    album: {
+      label: "Photo album", hint: "A button to your shared photo album, like a Google Drive folder or a Google Photos album.",
+      fields: [
+        { key: "url", kind: "text", label: "Album link (starts with https://)" },
+        { key: "label", kind: "text", label: "Button text" },
+        { key: "note", kind: "textarea", label: "Instructions for guests (optional)" }
+      ],
+      defaults: () => ({ url: "", label: "Open the photo album", note: "See everyone’s photos. To add yours, open the album and upload them (you may need to sign in)." }),
+      display(block) {
+        const c = block.config, url = String(c.url || "");
+        if (!/^https:\/\//i.test(url)) return h("p", { class: "hint", style: "margin:0" }, "The photo album link is coming soon.");
+        return h("div", null, c.note ? h("p", { class: "pre", style: "margin:0 0 12px" }, String(c.note)) : null,
+          h("a", { class: "btn", href: url, target: "_blank", rel: "noopener noreferrer" }, String(c.label || "Open the photo album")));
       }
     }
   };
@@ -800,13 +1099,21 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
       if (data.error) add(app, h("div", { class: "notice" }, data.error));
       else {
         const known = new Set(data.sections.map(s => s.id));
-        const groups = data.sections.map(s => ({ name: s.name, events: data.events.filter(e => e.sectionId === s.id) }));
+        const current = data.sections.filter(s => s.status !== "readonly");
+        const past = data.sections.filter(s => s.status === "readonly");
+        const groups = current.map(s => ({ name: s.name, events: data.events.filter(e => e.sectionId === s.id) }));
         const loose = data.events.filter(e => !known.has(e.sectionId));
         if (loose.length) groups.push({ name: data.sections.length ? "More events" : "Events", events: loose });
-        if (!groups.length) add(app, h("p", { class: "hint section" }, "No events yet. Check back soon."));
+        if (!groups.length && !past.length) add(app, h("p", { class: "hint section" }, "No events yet. Check back soon."));
         groups.forEach(g => add(app, h("section", { class: "section" }, h("h2", null, g.name),
           g.events.length ? g.events.map(eventCard) : h("p", { class: "hint" }, "No events in this section yet."))));
+        if (past.length) add(app, h("details", { class: "past section" }, h("summary", null, "Past events"),
+          past.map(sc => h("section", { class: "section", style: "margin-top:16px" }, h("h2", null, sc.name),
+            data.events.filter(e => e.sectionId === sc.id).map(eventCard)))));
       }
+      if (!data.error) add(app, h("section", { class: "card section" }, h("h2", null, "Have an idea?"),
+        h("p", { class: "hint", style: "margin-top:0" }, "Suggest an event for the group. The host reviews ideas before they’re posted."),
+        h("a", { class: "btn", href: "#/suggest" }, "Suggest an event")));
       add(app, h("div", { class: "foot" }, h("a", { href: "#/host" }, "Host tools")));
     }
     render();
@@ -829,7 +1136,8 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     const finalDate = calTextFor(ev);
     add(root, h("section", { class: "hero" }, h("h1", null, ev.title),
       ev.description ? h("p", { class: "pre" }, ev.description) : null,
-      finalDate || ev.time || ev.location ? h("div", { class: "meta" }, finalDate ? h("div", null, finalDate) : null, ev.time ? h("div", null, ev.time) : null, ev.location ? h("div", null, ev.location) : null) : null));
+      finalDate || ev.time || ev.location ? h("div", { class: "meta" }, finalDate ? h("div", null, finalDate) : null, ev.time ? h("div", null, ev.time) : null, ev.location ? h("div", null, ev.location) : null) : null,
+      ev.suggestedBy ? h("p", { class: "suggested" }, `Suggested by ${ev.suggestedBy}`) : null));
     const shareText = [ev.title, finalDate, ev.location].filter(Boolean).join("\n") + "\n\nRSVP here: " + eventLink(ev);
     const copyBtn = h("button", { type: "button", class: "btn small ghost", onclick: async () => {
       const ok = await copyText(eventLink(ev));
@@ -839,7 +1147,9 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     add(root, h("div", { class: "share" },
       h("a", { class: "btn small ghost", href: whatsappLink(shareText), target: "_blank", rel: "noopener noreferrer" }, "Share on WhatsApp"), copyBtn));
     if (session.get("planner-pass", "")) add(root, h("p", { class: "hint" }, h("a", { href: "#/host/e/" + encodeURIComponent(ev.id) }, "Edit this event")));
-    if (!open) add(root, h("div", { class: "notice" }, "This event isn’t taking answers right now. You can still see everyone’s responses."));
+    if (!open) add(root, h("div", { class: "notice" }, ev.sectionReadonly
+      ? "This event is archived. You can still see everyone’s answers, but they can’t be changed."
+      : "This event isn’t taking answers right now. You can still see everyone’s responses."));
 
     let nameInput = null, welcome = null, emailInput = null, emailDirty = false;
     if (open && answerable.length) {
@@ -861,7 +1171,7 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
       const slot = h("div"), res = h("div", { class: "results" });
       add(card, [slot, res]);
       let input = null;
-      const ctx = { me: () => nameKey(state.name), rows: () => data.rowsOf(block.id) };
+      const ctx = { me: () => nameKey(state.name), name: () => state.name, rows: () => data.rowsOf(block.id) };
       const set = a => { state.answers[block.id] = a; state.dirty.add(block.id); markDirty(); };
       function reload() { if (!open) return; clear(slot); input = T.respond(block, state.answers[block.id], set, ctx); add(slot, input); }
       function refresh() {
@@ -933,6 +1243,9 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
         await call("POST", { action: "respond", eventId: ev.id, name: state.name, answers, email: email || undefined });
         store.set("planner-name", state.name);
         if (email) store.set("planner-email", email);
+        Object.keys(answers).forEach(bid => {
+          if (Array.isArray(answers[bid].guestContacts)) store.set(`planner-gc:${bid}:${nameKey(state.name)}`, JSON.stringify(answers[bid].guestContacts));
+        });
         state.dirty.clear();
         emailDirty = false;
         saveMsg.textContent = `Saved. Thanks, ${state.name.split(" ")[0]}!`;
@@ -951,6 +1264,72 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
       dirty: () => state.dirty.size > 0 || (emailDirty && !!emailInput && !!emailInput.value.trim()),
       refresh() { cards.forEach(c => { c.refresh(); c.live(); }); }
     };
+  }
+
+  /* ===================== Suggest an event ===================== */
+  function viewSuggest() {
+    clear(app);
+    document.title = "Suggest an event | " + siteTitle();
+    add(app, [h("a", { class: "back", href: "#/" }, "‹ All events"), h("h1", null, "Suggest an event"),
+      h("p", { class: "sub" }, "Share your idea and a few details. The host reviews it before it’s posted for everyone.")]);
+    if (data.error) { add(app, h("div", { class: "notice" }, data.error)); return null; }
+    const f = {
+      name: h("input", { type: "text", id: "s-name", maxLength: 60, autocomplete: "name", value: store.get("planner-name", "") }),
+      email: h("input", { type: "email", id: "s-email", maxLength: 254, autocomplete: "email", inputmode: "email", autocapitalize: "off", spellcheck: "false", value: store.get("planner-email", "") }),
+      title: h("input", { type: "text", id: "s-title", maxLength: 80, placeholder: "Example: Beach cleanup" }),
+      section: select([["", "Not sure"]].concat(data.sections.filter(s => s.status === "active").map(s => [s.id, s.name])), "", "s-section"),
+      description: h("textarea", { id: "s-desc", maxLength: 1500, placeholder: "What’s the plan? Who’s it for?" }),
+      location: h("input", { type: "text", id: "s-loc", maxLength: 120 }),
+      time: h("input", { type: "text", id: "s-time", maxLength: 60, placeholder: "Example: Saturday afternoon" }),
+      bring: h("textarea", { id: "s-bring", maxLength: 1200, placeholder: "One per line, like Snacks" }),
+      website: h("input", { type: "text", id: "s-website", tabindex: "-1", autocomplete: "off" })
+    };
+    const days = new Set();
+    const calMount = h("div", { style: "margin-top:16px" });
+    const now = new Date(), tk = todayKey();
+    mountCal(calMount, { title: "Possible dates (optional)", months: monthsFrom(now.getFullYear(), now.getMonth() + 1, 12), allowed: k => k >= tk, selected: days,
+      legend: "Tap any days that could work. Skip this if you’re not sure." });
+    const st = statusEl();
+    let busy = false, sent = false;
+    const send = h("button", { type: "button", class: "btn", onclick: async () => {
+      if (busy) return;
+      const name = f.name.value.trim().replace(/\s+/g, " "), title = f.title.value.trim(), email = f.email.value.trim();
+      if (!name) { st.textContent = "Add your name first."; f.name.focus(); return; }
+      if (!title) { st.textContent = "Give your event a name."; f.title.focus(); return; }
+      if (email && !EMAIL_RE.test(email)) { st.textContent = "That email address doesn’t look right."; f.email.focus(); return; }
+      busy = true; send.disabled = true; st.textContent = "Sending…";
+      try {
+        await call("POST", { action: "suggestEvent", name, email, title, sectionId: f.section.value, description: f.description.value,
+          location: f.location.value, time: f.time.value, days: [...days].sort(),
+          bring: f.bring.value.split("\n").map(x => x.trim()).filter(Boolean), website: f.website.value });
+        store.set("planner-name", name);
+        if (email) store.set("planner-email", email);
+        sent = true;
+        clear(app);
+        add(app, [h("a", { class: "back", href: "#/" }, "‹ All events"), h("h1", null, "Thanks!"),
+          h("p", { class: "sub" }, `Your idea for “${title}” is with the host. It’ll show up on the home page once it’s reviewed and posted.`),
+          h("a", { class: "btn", href: "#/", style: "margin-top:20px" }, "Back to all events")]);
+        window.scrollTo(0, 0);
+      } catch (err) {
+        st.textContent = err.message;
+      } finally {
+        busy = false; send.disabled = false;
+      }
+    } }, "Send my idea");
+    add(app, h("section", { class: "card" },
+      label("Your name", "s-name"), f.name,
+      label("Your email (optional)", "s-email"), f.email,
+      h("p", { class: "hint" }, "Only the host sees it. You’ll get an email when your idea is posted."),
+      label("Event name", "s-title"), f.title,
+      label("Which section fits best?", "s-section"), f.section,
+      label("Description", "s-desc"), f.description,
+      label("Location (optional)", "s-loc"), f.location,
+      label("Time (optional)", "s-time"), f.time,
+      calMount,
+      label("Things people could bring (optional)", "s-bring"), f.bring,
+      h("div", { class: "honeypot", "aria-hidden": "true" }, h("label", { for: "s-website" }, "Leave this empty"), f.website),
+      send, st));
+    return { dirty: () => !sent && !!(f.title.value.trim() || f.description.value.trim()) };
   }
 
   /* ===================== Host views ===================== */
@@ -1033,6 +1412,24 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
         h("button", { type: "button", class: "linkbtn", onclick: () => { session.del("planner-pass"); hostData = null; route(); } }, "Lock"))]);
     showFlash();
 
+    // Guest suggestions waiting for review
+    const pending = hostData.events.filter(e => e.status === "pending");
+    if (pending.length) add(app, h("section", { class: "card" }, h("h2", null, `Suggestions to review (${pending.length})`),
+      h("p", { class: "hint", style: "margin-top:0" }, "Guests suggested these. Nobody else can see them until you publish."),
+      h("ul", { class: "list" }, pending.map(ev => h("li", null,
+        h("div", { class: "top" }, h("a", { href: "#/host/e/" + encodeURIComponent(ev.id) }, ev.title), h("span", { class: "badge" }, "Review")),
+        h("div", { class: "names" }, `From ${ev.suggestedBy || "a guest"}` + (ev.suggestedAt ? `, ${shortStamp(ev.suggestedAt)}` : "")))))));
+
+    // Everything scheduled to go out
+    const upcomingAll = (hostData.scheduled || []).filter(x => x.status === "scheduled").sort((a, b) => (a.sendAt < b.sendAt ? -1 : 1));
+    if (upcomingAll.length) add(app, h("section", { class: "card" }, h("h2", null, `Scheduled messages (${upcomingAll.length})`),
+      hostData.schedulerRunning === false ? h("div", { class: "notice" }, "Scheduled messages aren’t running yet. In Apps Script, run installScheduler once.") : null,
+      h("ul", { class: "list" }, upcomingAll.slice(0, 8).map(x => {
+        const ev = hostData.event(x.eventId);
+        return h("li", null, h("div", { class: "top" }, h("a", { href: "#/host/e/" + encodeURIComponent(x.eventId) }, ev ? ev.title : "Event"), h("span", { class: "badge" }, whenText(x.sendAt))),
+          h("div", { class: "names" }, channelText(x)));
+      }))));
+
     // Home page: title, subtitle, background photo
     const tIn = h("input", { type: "text", id: "h-site-title", maxLength: 80, value: hostData.settings.siteTitle || DEFAULT_TITLE });
     const sIn = h("input", { type: "text", id: "h-site-sub", maxLength: 120, value: hostData.settings.siteSub || "" });
@@ -1092,12 +1489,12 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     return null;
   }
 
-  const EVENT_STATUS_LABEL = { open: "Open", closed: "Closed", hidden: "Hidden draft" };
+  const EVENT_STATUS_LABEL = { open: "Open", closed: "Closed", hidden: "Hidden draft", pending: "Waiting for review" };
 
   function sectionCard(sec, i, n) {
     const st = statusEl();
     const nameIn = h("input", { type: "text", id: `sec-${sec.id}`, maxLength: 60, value: sec.name });
-    const statusSel = select([["active", "Showing on the page"], ["hidden", "Hidden"], ["archived", "Remove"]], sec.status, `secst-${sec.id}`);
+    const statusSel = select([["active", "Showing on the page"], ["readonly", "Archived: visible but read-only"], ["hidden", "Hidden"], ["archived", "Remove"]], sec.status, `secst-${sec.id}`);
     const save = h("button", { type: "button", class: "btn small", onclick: () => act(save, st, async () => {
       if (statusSel.value === "archived" && !confirm(`Remove “${sec.name}” from the page? Its events will move to “Not in a section” here.`)) throw new Error("Nothing changed.");
       await hostCall({ action: "saveSection", id: sec.id, name: nameIn.value, status: statusSel.value });
@@ -1109,6 +1506,7 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
       h("div", { class: "top" }, h("a", { href: "#/host/e/" + encodeURIComponent(ev.id) }, ev.title), h("span", { class: "badge" }, EVENT_STATUS_LABEL[ev.status] || ev.status)),
       h("div", { class: "tools", style: "margin-top:6px" },
         h("a", { class: "mini", href: "#/host/e/" + encodeURIComponent(ev.id) }, "Edit"),
+        h("a", { class: "mini", href: "#/host/c/" + encodeURIComponent(ev.id) }, "Check-in"),
         moveBtn("event", ev.id, -1, j === 0, evSt), moveBtn("event", ev.id, 1, j === events.length - 1, evSt))))) : h("p", { class: "hint" }, "No events yet.");
 
     const titleIn = h("input", { type: "text", maxLength: 80, placeholder: "New event name", "aria-label": `New event name for ${sec.name}` });
@@ -1124,6 +1522,7 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     return h("section", { class: "card" },
       h("div", { class: "row" }, h("h3", null, sec.name), h("div", { class: "tools" }, moveBtn("section", sec.id, -1, i === 0, st), moveBtn("section", sec.id, 1, i === n - 1, st))),
       sec.status === "hidden" ? h("p", { class: "hint" }, "Hidden from guests.") : null,
+      sec.status === "readonly" ? h("p", { class: "hint" }, "Archived. Guests see it under Past events but can’t answer.") : null,
       label("Section name", `sec-${sec.id}`), nameIn, label("Show on the page?", `secst-${sec.id}`), statusSel,
       h("div", { class: "tools", style: "margin-top:12px" }, save), st,
       h("h3", { class: "mt" }, "Events"), evList, evSt,
@@ -1146,18 +1545,19 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     document.title = `Edit ${ev.title} | ${siteTitle()}`;
     add(app, [h("h1", null, ev.title), h("p", { class: "hint" }, ev.status === "hidden"
       ? "Hidden draft. Guests can’t see it until you set the status to Open or Closed."
+      : ev.status === "pending" ? `Suggested by ${ev.suggestedBy || "a guest"}. Guests can’t see it until you publish it.`
       : h("a", { href: "#/e/" + encodeURIComponent(ev.id) }, "View the event page"))]);
     showFlash();
 
     // Event details
     const f = {
       title: h("input", { type: "text", id: "e-title", maxLength: 80, value: ev.title }),
-      section: select(hostData.sections.map(s => [s.id, s.name]), ev.sectionId, "e-section"),
+      section: select((hostData.sections.some(s => s.id === ev.sectionId) ? [] : [["", "Pick a section"]]).concat(hostData.sections.map(s => [s.id, s.name])), ev.sectionId, "e-section"),
       theme: select(THEMES, ev.theme, "e-theme"),
       description: h("textarea", { id: "e-desc", maxLength: 1500, value: ev.description }),
       location: h("input", { type: "text", id: "e-loc", maxLength: 120, value: ev.location, placeholder: "Address or place name" }),
       time: h("input", { type: "text", id: "e-time", maxLength: 60, value: ev.time, placeholder: "Example: Saturday, 6 PM" }),
-      status: select([["open", "Open for answers"], ["closed", "Closed (people can still see results)"], ["hidden", "Hidden draft"], ["archived", "Remove from the page"]], ev.status, "e-status")
+      status: select((ev.status === "pending" ? [["pending", "Waiting for review"]] : []).concat([["open", "Open for answers"], ["closed", "Closed (people can still see results)"], ["hidden", "Hidden draft"], ["archived", "Remove from the page"]]), ev.status, "e-status")
     };
     const st = statusEl();
     const save = h("button", { type: "button", class: "btn", onclick: () => act(save, st, async () => {
@@ -1167,6 +1567,28 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
       await afterWrite(f.status.value === "archived" ? "Event removed." : r.posted ? "Event saved and announced in GroupMe." : "Event saved.");
       if (f.status.value === "archived") location.hash = "#/host"; else route();
     }) }, "Save event details");
+    if (ev.status === "pending") {
+      const rst = statusEl();
+      const details = () => ({ action: "saveEvent", id: ev.id, title: f.title.value, sectionId: f.section.value, theme: f.theme.value, description: f.description.value, location: f.location.value, time: f.time.value });
+      const publish = h("button", { type: "button", class: "btn", onclick: () => act(publish, rst, async () => {
+        if (!f.title.value.trim()) throw new Error("Give the event a name.");
+        if (!f.section.value) { f.section.focus(); throw new Error("Pick a section in Event details below first."); }
+        const r = await hostCall(Object.assign(details(), { status: "open" }));
+        await afterWrite("Suggestion published." + (r.posted ? " It was announced in GroupMe." : "") + (r.thanked ? ` ${ev.suggestedBy || "The guest"} got an email that it’s posted.` : ""));
+        route();
+      }) }, "Publish it");
+      const decline = h("button", { type: "button", class: "btn ghost", onclick: () => act(decline, rst, async () => {
+        if (!confirm(`Decline “${ev.title}”? It stays in the sheet as archived, and no one is notified.`)) throw new Error("Nothing changed.");
+        await hostCall({ action: "saveEvent", id: ev.id, status: "archived" });
+        await afterWrite("Suggestion declined.");
+        location.hash = "#/host";
+      }) }, "Decline");
+      add(app, h("section", { class: "card" }, h("h2", null, "Review this suggestion"),
+        h("p", { class: "hint", style: "margin-top:0" }, `From ${ev.suggestedBy || "a guest"}` + (ev.suggestedAt ? ` on ${shortStamp(ev.suggestedAt)}` : "") + ". " +
+          (ev.suggesterHasEmail ? "They left an email, so they’ll get a note when you publish it." : "They didn’t leave an email.")),
+        h("p", { class: "hint" }, "Edit anything below or add blocks first if you like. Publishing saves the details and opens it for answers."),
+        publish, decline, rst));
+    }
     add(app, h("section", { class: "card" }, h("h2", null, "Event details"),
       label("Event name", "e-title"), f.title, label("Section", "e-section"), f.section, label("Page theme", "e-theme"), f.theme,
       label("Description", "e-desc"), f.description, label("Location (optional)", "e-loc"), f.location, label("Time (optional)", "e-time"), f.time,
@@ -1175,6 +1597,10 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     // Email reminder and group chat post (GroupMe or WhatsApp)
     add(app, reminderCard(ev));
     add(app, groupChatCard(ev));
+    add(app, scheduleCard(ev));
+    add(app, h("section", { class: "card section" }, h("h2", null, "Check-in"),
+      h("p", { class: "hint", style: "margin-top:0" }, "On the day, open the check-in list on your phone and tap people in as they arrive."),
+      h("a", { class: "btn", href: "#/host/c/" + encodeURIComponent(ev.id) }, "Open check-in list")));
 
     // Blocks
     const blocks = hostData.blocksOf(ev.id);
@@ -1201,15 +1627,30 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     const eds = T.fields.map(fd => fieldEditor(fd, b.config[fd.key], b.id));
     let suggest = null;
     if (b.type === "calendar") {
-      // Offer the most popular day from this event's date poll as the final date.
-      const dateEd = eds.find(e => e.key === "date");
+      // Offer the winners from this event's date poll and time poll as the final date and time.
+      const ed = k => eds.find(e => e.key === k);
+      const lines = [];
       const counts = {};
       hostData.blocksOf(b.eventId).filter(x => x.type === "dates").forEach(db => hostData.rowsOf(db.id).forEach(r =>
         arr(r.answer.days).forEach(d => { if (DATE_RE.test(d)) counts[d] = (counts[d] || 0) + 1; })));
       const top = Object.keys(counts).sort((a, z) => counts[z] - counts[a] || (a < z ? -1 : 1))[0];
-      if (top && dateEd && dateEd.set) suggest = h("div", { class: "notice" },
-        `Most popular day in your date poll: ${pretty(top)} (${plural(counts[top], "person", "people")}).`,
-        h("div", null, h("button", { type: "button", class: "linkbtn", onclick: () => dateEd.set(top) }, "Use this date")));
+      if (top && ed("date").set) lines.push(h("div", null, `Most popular day in your date poll: ${pretty(top)} (${plural(counts[top], "person", "people")}). `,
+        h("button", { type: "button", class: "linkbtn", onclick: () => ed("date").set(top) }, "Use this date")));
+      const tcounts = {}, slotOf = {};
+      hostData.blocksOf(b.eventId).filter(x => x.type === "times").forEach(tb => {
+        validSlots(tb.config.slots).forEach(sl => { slotOf[slotKey(sl)] = { sl, tz: tb.config.timeZone }; });
+        hostData.rowsOf(tb.id).forEach(r => arr(r.answer.slots).forEach(k => { if (slotOf[k]) tcounts[k] = (tcounts[k] || 0) + 1; }));
+      });
+      const ttop = Object.keys(tcounts).sort((a, z) => tcounts[z] - tcounts[a] || (a < z ? -1 : 1))[0];
+      if (ttop) {
+        const { sl, tz } = slotOf[ttop];
+        lines.push(h("div", null, `Most popular time in your time poll: ${pretty(sl.date)}, ${slotLabel(sl)} (${plural(tcounts[ttop], "person", "people")}). `,
+          h("button", { type: "button", class: "linkbtn", onclick: () => {
+            ed("date").set(sl.date); ed("start").set(sl.start); ed("end").set(sl.end);
+            if (tz && ed("timeZone").set) ed("timeZone").set(tz);
+          } }, "Use this time")));
+      }
+      if (lines.length) suggest = h("div", { class: "notice" }, lines);
     }
     const save = h("button", { type: "button", class: "btn small", onclick: () => act(save, st, async () => {
       const config = {};
@@ -1269,6 +1710,73 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
   }
 
   const shortStamp = iso => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const whenText = iso => new Date(iso).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const AUDIENCE_WORDS = { yes: "people going", yesmaybe: "going and maybe", all: "everyone with an email" };
+  const channelText = x => x.channels.map(c => (c === "groupme" ? "GroupMe" : `email to ${AUDIENCE_WORDS[x.audience] || "everyone"}`)).join(" and ");
+
+  function scheduleCard(ev) {
+    const gm = hostData.groupme || {};
+    const info = hostData.contacts[ev.id] || {};
+    const mine = (hostData.scheduled || []).filter(x => x.eventId === ev.id);
+    const upcoming = mine.filter(x => x.status === "scheduled").sort((a, b) => (a.sendAt < b.sendAt ? -1 : 1));
+    const history = mine.filter(x => x.status !== "scheduled").sort((a, b) => (a.sentAt < b.sentAt ? 1 : -1)).slice(0, 5);
+    const st = statusEl();
+    const gmCb = h("input", { type: "checkbox", id: "sc-gm", checked: !!gm.connected, disabled: !gm.connected });
+    const emCb = h("input", { type: "checkbox", id: "sc-em", checked: !gm.connected });
+    const aud = select(info.hasRsvp ? [["yes", "People who are going"], ["yesmaybe", "Going and maybe"], ["all", "Everyone who left an email"]] : [["all", "Everyone who left an email"]],
+      info.hasRsvp ? "yes" : "all", "sc-aud");
+    const subj = h("input", { type: "text", id: "sc-subj", maxLength: 120, value: `Reminder: ${ev.title}` });
+    const emailBits = h("div", null, label("Email goes to", "sc-aud"), aud, label("Email subject", "sc-subj"), subj);
+    const sync = () => { emailBits.hidden = !emCb.checked; };
+    emCb.addEventListener("change", sync);
+    sync();
+    const dateIn = h("input", { type: "date", id: "sc-date", min: todayKey() });
+    const timeIn = h("input", { type: "time", id: "sc-time", step: 300, value: "09:00" });
+    const msg = h("textarea", { id: "sc-msg", maxLength: 800, value: `Reminder: ${ev.title} is coming up. Tap the link for the details, and update your answer if anything changed.` });
+    const calB = hostData.blocksOf(ev.id).find(x => x.type === "calendar" && DATE_RE.test(String(x.config.date || "")));
+    const quick = calB ? h("div", { class: "tools", style: "margin-top:10px" },
+      [["Week before, 9 AM", -7, "09:00"], ["Day before, 9 AM", -1, "09:00"], ["Morning of, 8 AM", 0, "08:00"]].map(([l, n, t]) =>
+        h("button", { type: "button", class: "mini", onclick: () => { dateIn.value = addDays(nextOccurrence(calB.config) || calB.config.date, n); timeIn.value = t; } }, l))) : null;
+    const btn = h("button", { type: "button", class: "btn", onclick: () => act(btn, st, async () => {
+      const channels = [gmCb.checked && !gmCb.disabled ? "groupme" : null, emCb.checked ? "email" : null].filter(Boolean);
+      if (!channels.length) throw new Error("Choose GroupMe, email, or both.");
+      const t = String(timeIn.value || "").slice(0, 5);
+      if (!DATE_RE.test(dateIn.value) || !TIME_RE.test(t)) throw new Error("Pick a date and time.");
+      const when = new Date(`${dateIn.value}T${t}:00`);
+      if (isNaN(when.getTime()) || when.getTime() < Date.now() + 60000) throw new Error("Pick a time in the future.");
+      if (!msg.value.trim()) throw new Error("Write a short message first.");
+      const r = await hostCall({ action: "scheduleMessage", eventId: ev.id, sendAt: when.toISOString(), channels, audience: aud.value, subject: subj.value, message: msg.value });
+      await afterWrite(`Scheduled for ${whenText(when.toISOString())}.` + (r.warning ? ` ${r.warning}` : ""));
+      route();
+    }) }, "Schedule it");
+    const item = (x, waiting) => {
+      const cst = statusEl();
+      const cancel = waiting ? h("button", { type: "button", class: "linkbtn", onclick: () => act(cancel, cst, async () => {
+        if (!confirm("Cancel this scheduled message?")) throw new Error("Nothing changed.");
+        await hostCall({ action: "cancelScheduled", id: x.id });
+        await afterWrite("Scheduled message canceled.");
+        route();
+      }) }, "Cancel") : null;
+      return h("li", null,
+        h("div", { class: "top" }, h("span", null, waiting ? whenText(x.sendAt) : `Sent ${whenText(x.sentAt)}`),
+          waiting ? null : h("span", { class: x.status === "failed" ? "badge need" : "badge" }, x.status === "failed" ? "Didn’t send" : "Sent")),
+        h("div", { class: "names" }, channelText(x)),
+        h("div", { class: "names pre" }, x.message.length > 140 ? x.message.slice(0, 140) + "…" : x.message),
+        !waiting && x.result ? h("div", { class: "names" }, x.result) : null,
+        cancel, cst);
+    };
+    return h("section", { class: "card section" }, h("h2", null, "Schedule a message"),
+      h("p", { class: "hint", style: "margin-top:0" }, "Write it now and pick when it goes out. It sends within about 10 minutes of the time you choose, with a link to this event."),
+      upcoming.length && hostData.schedulerRunning === false ? h("div", { class: "notice" }, "Scheduled messages aren’t running yet. In Apps Script, run installScheduler once.") : null,
+      h("div", { class: "toggle" }, gmCb, h("label", { for: "sc-gm" }, gm.connected ? "Post in GroupMe" : "Post in GroupMe (connect it in Host tools first)")),
+      h("div", { class: "toggle" }, emCb, h("label", { for: "sc-em" }, "Send an email reminder")),
+      emailBits,
+      h("div", { class: "timerow", style: "margin-top:4px" }, h("div", null, label("Send on", "sc-date"), dateIn), h("div", null, label("At", "sc-time"), timeIn)),
+      quick,
+      label("Message", "sc-msg"), msg, btn, st,
+      upcoming.length ? h("div", { class: "mt" }, h("h3", null, `Waiting to send (${upcoming.length})`), h("ul", { class: "list" }, upcoming.map(x => item(x, true)))) : null,
+      history.length ? h("div", { class: "mt" }, h("h3", null, "Recently sent"), h("ul", { class: "list" }, history.map(x => item(x, false)))) : null);
+  }
 
   function groupMeCard() {
     const gm = hostData.groupme || {};
@@ -1345,7 +1853,7 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
       return { key: fd.key, el: [label(fd.label, id), inp], read: () => clampInt(inp.value, fd.min, fd.max, fd.min) };
     }
     if (fd.kind === "text") {
-      const inp = h("input", { type: "text", id, maxLength: 200, value: String(v || "") });
+      const inp = h("input", { type: "text", id, maxLength: 500, value: String(v || "") });
       return { key: fd.key, el: [label(fd.label, id), inp], read: () => inp.value.trim() };
     }
     if (fd.kind === "textarea") {
@@ -1401,13 +1909,56 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     if (fd.kind === "time") {
       const inp = h("input", { type: "time", id, step: 300, value: TIME_RE.test(String(v || "")) ? String(v) : "" });
       const clearBtn = h("button", { type: "button", class: "linkbtn", onclick: () => { inp.value = ""; } }, "Clear");
-      return { key: fd.key, el: [label(fd.label, id), h("div", { class: "timerow" }, inp, clearBtn)], read: () => { const t = String(inp.value || "").slice(0, 5); return TIME_RE.test(t) ? t : ""; } };
+      return { key: fd.key, el: [label(fd.label, id), h("div", { class: "timerow" }, inp, clearBtn)], read: () => { const t = String(inp.value || "").slice(0, 5); return TIME_RE.test(t) ? t : ""; },
+        set: t => { inp.value = TIME_RE.test(String(t || "")) ? t : ""; } };
     }
     if (fd.kind === "zone") {
       const opts = ZONES.slice(), dz = deviceZone(), cur = String(v || "");
       if (zoneOk(dz) && !opts.some(o => o[0] === dz)) opts.unshift([dz, zoneLabel(dz) + " (this device)"]);
       if (zoneOk(cur) && !opts.some(o => o[0] === cur)) opts.unshift([cur, zoneLabel(cur)]);
       const sel = select(opts, zoneOk(cur) ? cur : (zoneOk(dz) ? dz : "America/New_York"), id);
+      return { key: fd.key, el: [label(fd.label, id), sel], read: () => sel.value,
+        set: tz => { if (zoneOk(tz)) { if (![...sel.options].some(o => o.value === tz)) sel.insertBefore(h("option", { value: tz }, zoneLabel(tz)), sel.firstChild); sel.value = tz; } } };
+    }
+    if (fd.kind === "timeslots") {
+      let slots = validSlots(v);
+      const days = new Set();
+      const calMount = h("div", { style: "margin-top:12px" });
+      const tk = todayKey(), now = new Date();
+      const drawCal = () => mountCal(calMount, { title: "Days to add times to", months: monthsFrom(now.getFullYear(), now.getMonth() + 1, 18), allowed: k => k >= tk,
+        selected: days, legend: "Tap one or more days, set a start time (and end time if you like), then tap Add times." });
+      drawCal();
+      const sIn = h("input", { type: "time", id: `${id}-start`, step: 300 });
+      const eIn = h("input", { type: "time", id: `${id}-end`, step: 300 });
+      const note = h("p", { class: "hint", "aria-live": "polite" });
+      const listBox = h("div", { style: "margin-top:6px" });
+      function drawList() {
+        clear(listBox);
+        if (!slots.length) { add(listBox, h("p", { class: "hint", style: "margin:0" }, "No time options yet.")); return; }
+        groupByDate(slots).forEach(([date, list]) => add(listBox, h("div", { class: "tgroup" }, h("div", { class: "tday" }, pretty(date)),
+          h("ul", { class: "slist" }, list.map(sl => h("li", { class: "srow" }, h("div", { class: "shead" }, h("span", { style: "flex:1" }, slotLabel(sl)),
+            h("button", { type: "button", class: "linkbtn", "aria-label": `Remove ${pretty(date)}, ${slotLabel(sl)}`,
+              onclick: () => { slots = slots.filter(x => slotKey(x) !== slotKey(sl)); drawList(); } }, "Remove"))))))));
+      }
+      const addBtn = h("button", { type: "button", class: "btn small", onclick: () => {
+        const st = String(sIn.value || "").slice(0, 5), en = String(eIn.value || "").slice(0, 5);
+        if (!days.size) { note.textContent = "Tap at least one day first."; return; }
+        if (!TIME_RE.test(st)) { note.textContent = "Set a start time first."; return; }
+        const before = slots.length;
+        days.forEach(date => { const sl = { date, start: st, end: TIME_RE.test(en) && en !== st ? en : "" }; if (!slots.some(x => slotKey(x) === slotKey(sl))) slots.push(sl); });
+        slots = validSlots(slots);
+        note.textContent = `Added ${plural(slots.length - before, "time option", "time options")}. Tap Save block to keep them.`;
+        days.clear();
+        drawCal();
+        drawList();
+      } }, "Add times");
+      drawList();
+      return { key: fd.key, el: [h("div", { class: "field" }, fd.label), listBox, calMount,
+        h("div", { class: "timerow", style: "margin-top:4px" }, h("div", null, label("Start time", `${id}-start`), sIn), h("div", null, label("End time (optional)", `${id}-end`), eIn)),
+        h("div", { style: "margin-top:12px" }, addBtn), note], read: () => slots };
+    }
+    if (fd.kind === "select") {
+      const sel = select(fd.options, fd.options.some(o => o[0] === v) ? v : fd.options[0][0], id);
       return { key: fd.key, el: [label(fd.label, id), sel], read: () => sel.value };
     }
     if (fd.kind === "choices") {
@@ -1422,6 +1973,87 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     return { key: fd.key, el: null, read: () => v };
   }
 
+  /* ===================== Check-in on the day ===================== */
+  async function viewCheckin(id, seq) {
+    if (!(await ensureHost(seq))) return null;
+    const ev = hostData.event(id);
+    clear(app);
+    add(app, h("a", { class: "back", href: "#/host/e/" + encodeURIComponent(id) }, "‹ Back to the event"));
+    if (!ev) { add(app, h("div", { class: "notice" }, "That event isn’t here anymore.")); return null; }
+    document.title = `Check-in: ${ev.title} | ${siteTitle()}`;
+    add(app, [h("h1", null, "Check-in"), h("p", { class: "sub" }, ev.title)]);
+    const rsvp = hostData.blocksOf(ev.id).find(b => b.type === "rsvp");
+    const here = new Map();
+    (hostData.checkins || []).filter(c => c.eventId === ev.id).forEach(c => here.set(c.nameKey, c.party));
+    const parties = [];
+    if (rsvp) hostData.rowsOf(rsvp.id).filter(r => r.answer.status === "yes" || r.answer.status === "maybe").forEach(r =>
+      parties.push({ name: r.name, key: r.key, party: 1 + clampInt(r.answer.guests, 0, 20, 0), kind: r.answer.status, guests: arr(r.answer.guestNames).filter(x => x.trim()) }));
+    (hostData.checkins || []).filter(c => c.eventId === ev.id && !parties.some(p => p.key === c.nameKey)).forEach(c =>
+      parties.push({ name: c.name, key: c.nameKey, party: c.party, kind: "walkin", guests: [] }));
+    const sortParties = () => parties.sort((a, b) => a.name.localeCompare(b.name));
+    sortParties();
+    const counts = h("div");
+    const search = h("input", { type: "text", id: "ci-search", autocomplete: "off", placeholder: "Start typing a name" });
+    const listEl = h("ul", { class: "list checkin-list" });
+    const st = statusEl();
+    function draw() {
+      const q = search.value.trim().toLowerCase();
+      clear(counts);
+      const people = list => list.reduce((n, p) => n + p.party, 0);
+      add(counts, stats([[people(parties.filter(p => here.has(p.key))), "here now"], [people(parties.filter(p => p.kind === "yes")), "said going"],
+        [people(parties.filter(p => p.kind === "maybe")), "said maybe"]]));
+      clear(listEl);
+      parties.filter(p => !q || p.name.toLowerCase().includes(q)).forEach(p => {
+        const isHere = here.has(p.key);
+        listEl.appendChild(h("li", null,
+          h("div", { class: "top" }, h("span", null, p.name + (p.party > 1 ? ` +${p.party - 1}` : "")),
+            h("button", { type: "button", class: isHere ? "btn small" : "btn small ghost", "aria-pressed": isHere ? "true" : "false",
+              "aria-label": `${isHere ? "Undo check-in for" : "Check in"} ${p.name}`, onclick: () => toggle(p) }, isHere ? "Here" : "Check in")),
+          h("div", { class: "names" }, (p.kind === "maybe" ? "Said maybe" : p.kind === "walkin" ? "Walk-in" : "Going") +
+            (p.guests.length ? `. Guests: ${p.guests.join(", ")}` : ""))));
+      });
+      if (!listEl.children.length) listEl.appendChild(h("li", null, h("span", { class: "names" }, q ? "No one matches that name." : "No one has said they’re coming yet.")));
+    }
+    let busy = false;
+    async function toggle(p) {
+      if (busy) return;
+      busy = true;
+      const was = here.has(p.key);
+      if (was) here.delete(p.key); else here.set(p.key, p.party);
+      draw(); // show it right away, then save
+      try {
+        await hostCall({ action: "checkIn", eventId: ev.id, name: p.name, party: p.party, present: !was });
+        hostData.checkins = (hostData.checkins || []).filter(c => !(c.eventId === ev.id && c.nameKey === p.key));
+        if (!was) hostData.checkins.push({ eventId: ev.id, nameKey: p.key, name: p.name, party: p.party });
+        st.textContent = "";
+      } catch (err) {
+        if (was) here.set(p.key, p.party); else here.delete(p.key);
+        draw();
+        st.textContent = err.message;
+      } finally {
+        busy = false;
+      }
+    }
+    const wName = h("input", { type: "text", id: "ci-walkin", maxLength: 60, autocomplete: "off", placeholder: "First and last name" });
+    const wParty = select(Array.from({ length: 10 }, (_, i) => [String(i + 1), i ? `${i + 1} people` : "1 person"]), "1", "ci-party");
+    const wBtn = h("button", { type: "button", class: "btn", onclick: async () => {
+      const name = wName.value.trim().replace(/\s+/g, " ");
+      if (!name) { st.textContent = "Add the walk-in’s name first."; wName.focus(); return; }
+      const key = nameKey(name);
+      let p = parties.find(x => x.key === key);
+      if (!p) { p = { name, key, party: Number(wParty.value), kind: "walkin", guests: [] }; parties.push(p); sortParties(); }
+      wName.value = "";
+      if (!here.has(key)) await toggle(p); else draw();
+    } }, "Add and check in");
+    search.addEventListener("input", draw);
+    draw();
+    add(app, [counts, label("Find someone", "ci-search"), search, listEl, st,
+      h("section", { class: "card section" }, h("h2", null, "Walk-in"),
+        h("p", { class: "hint", style: "margin-top:0" }, "Someone who didn’t RSVP? Add them here."),
+        label("Name", "ci-walkin"), wName, label("How many people", "ci-party"), wParty, wBtn)]);
+    return null;
+  }
+
   /* ===================== Router ===================== */
   let current = null, routeSeq = 0, lastHash = location.hash || "#/", skipGuard = false;
   function route() {
@@ -1432,6 +2064,8 @@ a.btn { display: block; text-align: center; text-decoration: none; margin-top: 0
     if (hash === "#/host") result = viewHost(seq);
     else if ((m = hash.match(/^#\/host\/e\/(.+)$/))) result = viewHostEvent(decodeURIComponent(m[1]), seq);
     else if ((m = hash.match(/^#\/e\/(.+)$/))) result = viewEvent(decodeURIComponent(m[1]));
+    else if (hash === "#/suggest") result = viewSuggest();
+    else if ((m = hash.match(/^#\/host\/c\/(.+)$/))) result = viewCheckin(decodeURIComponent(m[1]), seq);
     else result = viewHome();
     current = null;
     Promise.resolve(result).then(v => { if (seq === routeSeq) current = v || null; });
